@@ -28,6 +28,12 @@
 
 - (void)viewDidLayoutSubviews
 {
+    // デバイスの回転の検出
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(didChangedOrientation:)
+               name:UIDeviceOrientationDidChangeNotification object:nil];
+
     // カメラ
     UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypeCamera;
     if ([UIImagePickerController isSourceTypeAvailable:sourceType]) {
@@ -73,49 +79,25 @@
         _motionManager.deviceMotionUpdateInterval = 0.1f;
         [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue currentQueue]
                                             withHandler: ^ (CMDeviceMotion* motion, NSError* error) {
-                                                //NSLog(@" %.1f %.1f",motion.gravity.x , motion.gravity.z);
                                                 // ARのビューにジャイロ情報を送る
                                                 self.arView.gravity = motion.gravity;
                                             }
-
-//         motion.attitude.pitch * 180 / M_PI
-         
          ];
 
     }
-    // dデバイスの回転の検出
-    // 通知を解除する
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(didChangedOrientation:)
-               name:UIDeviceOrientationDidChangeNotification object:nil];
 }
-
 
 #pragma mark - Notification
 
 - (void)didChangedOrientation:(NSNotification *)notification
 {
-    UIDeviceOrientation orientation = [[notification object] orientation];
-    switch (orientation) {
-
-        case UIDeviceOrientationPortrait:
-        case UIDeviceOrientationPortraitUpsideDown:
-            self.arView.isPortrait = true;
-            break;
-        case UIDeviceOrientationLandscapeLeft:
-        case UIDeviceOrientationLandscapeRight:
-            self.arView.isPortrait = false;
-            break;
-    }
+    self.arView.orientation = [[notification object] orientation];
 }
 
-
+#pragma mark - LocationManager Delegate
 // 方向の取得
 -(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
-//    NSLog(@"trueHeading %f, magneticHeading %f",
-//          newHeading.trueHeading, newHeading.magneticHeading);
     // ARのビューに現在の方向を送る
     self.arView.heading = newHeading.trueHeading;
 }
@@ -124,12 +106,6 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-#pragma mark - Action
-
-- (IBAction)tapButton:(id)sender {
-
-
 }
 
 @end

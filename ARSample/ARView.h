@@ -21,7 +21,7 @@
 //@property (nonatomic) float yaw;
 @property (nonatomic) CMAcceleration gravity;
 @property (nonatomic) float heading;
-@property (nonatomic) bool isPortrait;
+@property (nonatomic) UIDeviceOrientation orientation;
 
 // アニメーション
 - (void)startAnimation;

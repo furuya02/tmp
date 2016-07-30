@@ -66,8 +66,6 @@ CADisplayLink* displayLink;
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
-
-    self.isPortrait = YES;
     return self;
 }
 
@@ -102,16 +100,24 @@ CADisplayLink* displayLink;
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // 加速度による回転
-    glRotatef(_gravity.z * -90.0, 1, 0, 0);
+    glRotatef(_gravity.z * -90, 1, 0, 0);
     glRotatef(_gravity.x * 90, 0, 0, 1);
-//  glRotatef(_gravity.y * -90.0f, 0, 1, 0); // これはコンパスで制御する
-    // 電子コンパスによる回転
-    if ( _isPortrait) {
-        glRotatef(_heading , 0, 1, 0);
+    // コンパスによる回転
+    float heading = _heading;
+    switch(self.orientation) {
+        case UIDeviceOrientationPortrait:            // Device oriented vertically, home button on the bottom
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:  // Device oriented vertically, home button on the top
+            heading -= 180;
+            break;
+        case UIDeviceOrientationLandscapeLeft:       // Device oriented horizontally, home button on the right
+            heading -= 270;
+            break;
+        case UIDeviceOrientationLandscapeRight:      // Device oriented horizontally, home button on the left
+            heading -= 90;
+            break;
     }
-    else {
-        glRotatef(_heading - 270, 0, 1, 0); // 横向きになると、コンパスの値が変わる
-    }
+    glRotatef(heading , 0, 1, 0);
 
     // ポリゴン作成
     int i;
