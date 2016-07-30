@@ -12,20 +12,14 @@
 #import <OpenGLES/ES1/glext.h>
 
 
-
-@interface ARView()
-
-
-@end
-
 @implementation ARView
 
 EAGLContext *context;
-CADisplayLink* displayLink;
 GLuint framebuffer;
 GLuint colorRenderbuffer;
 GLint  backingWidth;
 GLint  backingHeight;
+CADisplayLink* displayLink;
 
 + (Class)layerClass
 {
@@ -41,31 +35,34 @@ GLint  backingHeight;
     }
 
     // 初期化
-    // レイヤーの設定をする
-    CAEAGLLayer *layer = (CAEAGLLayer*)self.layer;
-    layer.opaque = NO;
-    layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
-                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                    nil];
 
-    // コンテキストの作成する
-    //* kEAGLRenderingAPIOpenGLES1(固定機能を使用したOpenGL ES 1.1)
-    //* kEAGLRenderingAPIOpenGLES2(自分で機能を全て記述するタイプの OpenGL ES 2.0)
+    // レイヤー設定
+    CAEAGLLayer *layer = (CAEAGLLayer*)self.layer;
+    // カメラの表示が見えるようにするため透明にする
+    layer.opaque = NO;
+    // 描画の設定
+    layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [NSNumber numberWithBool:NO],kEAGLDrawablePropertyRetainedBacking, //描画後にレンダバッファを破棄
+                                kEAGLColorFormatRGBA8,kEAGLDrawablePropertyColorFormat,// カラーレンダバッファは8bit（デフォルト値）
+                                nil];
+    // コンテキストの作成
     context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
     [EAGLContext setCurrentContext:context];
 
 
-    // フレームバッファを作成する
+    // フレームバッファの生成
     glGenFramebuffersOES(1, &framebuffer);
+    // レンダラーバッファの生成
     glGenRenderbuffersOES(1, &colorRenderbuffer);
-
+    // フレームバッファのバインド
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+    // レンダラーバッファのバインド
     glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
+    // レンダーバッファに、描画可能なオブジェクトのストレージをバインド
     [context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
-    glFramebufferRenderbufferOES(
-                                 GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
-
+    //フレームバッファにレンダーバッファをカラーバッファとしてアタッチ
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
+    // ビューポートのためにサイズを取得する
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
