@@ -47,7 +47,7 @@
 
         // ARビュー作成
         self.arView = [[ARView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        self.arView.backgroundColor = [UIColor redColor];
+        //self.arViewBak.backgroundColor = [UIColor redColor];
         cameraPicker.cameraOverlayView = self.arView;
         // カメラの表示
         [self presentViewController:cameraPicker animated:NO completion:nil];

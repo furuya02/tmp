@@ -2,60 +2,37 @@
 //  ARView.m
 //  ARSample
 //
-//  Created by hirauchi.shinichi on 2016/07/30.
+//  Created by hirauchi.shinichi on 2016/07/31.
 //  Copyright © 2016年 SAPPOROWORKS. All rights reserved.
 //
 
 #import "ARView.h"
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/ES1/gl.h>
+#import <OpenGLES/ES1/glext.h>
 
+
+
+@interface ARView()
+
+
+@end
 
 @implementation ARView
 
-// Property
-@synthesize roll = _roll;
-@synthesize pitch = _pitch;
-@synthesize yaw = _yaw;
-@synthesize gravity = _gravity;
-@synthesize heading = _heading;
-
-//--------------------------------------------------------------//
-#pragma mark -- Initialize --
-//--------------------------------------------------------------//
+EAGLContext *context;
+CADisplayLink* displayLink;
+GLuint framebuffer;
+GLuint colorRenderbuffer;
+GLint  backingWidth;
+GLint  backingHeight;
 
 + (Class)layerClass
 {
+    // レイヤ（描画先）としてCAEAGLLayerを使用する
     return [CAEAGLLayer class];
 }
 
-//- (void)_init
-//{
-//    // レイヤーの設定をする
-//    CAEAGLLayer*    eaglLayer;
-//    eaglLayer = (CAEAGLLayer*)self.layer;
-//    eaglLayer.opaque = NO;
-//    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-//                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
-//                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-//                                    nil];
-//
-//    // OpenGLコンテキストを作成する
-//    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
-//    [EAGLContext setCurrentContext:_context];
-//
-//    // フレームバッファを作成する
-//    glGenFramebuffersOES(1, &_defaultFramebuffer);
-//    glGenRenderbuffersOES(1, &_colorRenderbuffer);
-//
-//    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _defaultFramebuffer);
-//    glBindRenderbufferOES(GL_RENDERBUFFER_OES, _colorRenderbuffer);
-//    [_context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
-//    glFramebufferRenderbufferOES(
-//                                 GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, _colorRenderbuffer);
-//
-//    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &_backingWidth);
-//    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &_backingHeight);
-//}
-//
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -65,59 +42,47 @@
 
     // 初期化
     // レイヤーの設定をする
-    CAEAGLLayer*    eaglLayer;
-    eaglLayer = (CAEAGLLayer*)self.layer;
-    eaglLayer.opaque = NO;
-    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+    CAEAGLLayer *layer = (CAEAGLLayer*)self.layer;
+    layer.opaque = NO;
+    layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
                                     kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                     nil];
 
-    // OpenGLコンテキストを作成する
-    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
-    [EAGLContext setCurrentContext:_context];
+    // コンテキストの作成する
+    //* kEAGLRenderingAPIOpenGLES1(固定機能を使用したOpenGL ES 1.1)
+    //* kEAGLRenderingAPIOpenGLES2(自分で機能を全て記述するタイプの OpenGL ES 2.0)
+    context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+    [EAGLContext setCurrentContext:context];
+
 
     // フレームバッファを作成する
-    glGenFramebuffersOES(1, &_defaultFramebuffer);
-    glGenRenderbuffersOES(1, &_colorRenderbuffer);
+    glGenFramebuffersOES(1, &framebuffer);
+    glGenRenderbuffersOES(1, &colorRenderbuffer);
 
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _defaultFramebuffer);
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, _colorRenderbuffer);
-    [_context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
+    [context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
     glFramebufferRenderbufferOES(
-                                 GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, _colorRenderbuffer);
+                                 GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
 
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &_backingWidth);
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &_backingHeight);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
     return self;
 }
 
-//- (id)initWithCoder:(NSCoder*)decoder
-//{
-//    self = [super initWithCoder:decoder];
-//    if (!self) {
-//        return nil;
-//    }
-//
-//    // 初期化
-//    [self _init];
-//
-//    return self;
-//}
-
-#pragma mark Drawing
 
 - (void)drawView:(id)sender
 {
     // 現在のコンテキストを作成する
-    if([EAGLContext currentContext] != _context){
-        [EAGLContext setCurrentContext:_context];
+    if([EAGLContext currentContext] != context){
+        [EAGLContext setCurrentContext:context];
     }
 
     // OpenGLの設定をする
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _defaultFramebuffer);
-    glViewport(0, 0, _backingWidth, _backingHeight);
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+    glViewport(0, 0, backingWidth, backingHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -186,8 +151,8 @@
     }
 
     // バッファを描画する
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, _defaultFramebuffer);
-    [_context presentRenderbuffer:GL_RENDERBUFFER_OES];
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, framebuffer);
+    [context presentRenderbuffer:GL_RENDERBUFFER_OES];
 
     // OpenGLの状態を無効化する
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -195,22 +160,21 @@
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-//--------------------------------------------------------------//
-#pragma mark -- Animation --
-//--------------------------------------------------------------//
+#pragma mark Public Method
 
 - (void)startAnimation
 {
     // ディスプレイリンクを有効化する
-    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
-    [_displayLink setFrameInterval:1];
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
+    [displayLink setFrameInterval:1];
+    [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 - (void)stopAnimation
 {
     // ディスプレイリンクを無効化する
-    [_displayLink invalidate], _displayLink = nil;
+    [displayLink invalidate], displayLink = nil;
 }
+
 
 @end

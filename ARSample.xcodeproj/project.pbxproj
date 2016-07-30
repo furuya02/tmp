@@ -15,7 +15,8 @@
 		D72D57311D4B23AB0073CDE1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D72D572F1D4B23AB0073CDE1 /* LaunchScreen.storyboard */; };
 		D72D573C1D4B23AC0073CDE1 /* ARSampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D573B1D4B23AC0073CDE1 /* ARSampleTests.m */; };
 		D72D574E1D4C375C0073CDE1 /* image.png in Resources */ = {isa = PBXBuildFile; fileRef = D72D574D1D4C375C0073CDE1 /* image.png */; };
-		D72D57501D4C8B3B0073CDE1 /* ARView.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D574F1D4C8B3B0073CDE1 /* ARView.m */; };
+		D72D57501D4C8B3B0073CDE1 /* ARViewBak.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D574F1D4C8B3B0073CDE1 /* ARViewBak.m */; };
+		D72D57541D4D073F0073CDE1 /* ARView.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D57531D4D073F0073CDE1 /* ARView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,8 +44,10 @@
 		D72D573B1D4B23AC0073CDE1 /* ARSampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARSampleTests.m; sourceTree = "<group>"; };
 		D72D573D1D4B23AC0073CDE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D72D574D1D4C375C0073CDE1 /* image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image.png; sourceTree = "<group>"; };
-		D72D574F1D4C8B3B0073CDE1 /* ARView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARView.m; sourceTree = "<group>"; };
-		D72D57511D4C8B550073CDE1 /* ARView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARView.h; sourceTree = "<group>"; };
+		D72D574F1D4C8B3B0073CDE1 /* ARViewBak.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARViewBak.m; sourceTree = "<group>"; };
+		D72D57511D4C8B550073CDE1 /* ARViewBak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARViewBak.h; sourceTree = "<group>"; };
+		D72D57521D4D073F0073CDE1 /* ARView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARView.h; sourceTree = "<group>"; };
+		D72D57531D4D073F0073CDE1 /* ARView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +99,10 @@
 				D72D572F1D4B23AB0073CDE1 /* LaunchScreen.storyboard */,
 				D72D57321D4B23AB0073CDE1 /* Info.plist */,
 				D72D57211D4B23AB0073CDE1 /* Supporting Files */,
-				D72D574F1D4C8B3B0073CDE1 /* ARView.m */,
-				D72D57511D4C8B550073CDE1 /* ARView.h */,
+				D72D574F1D4C8B3B0073CDE1 /* ARViewBak.m */,
+				D72D57511D4C8B550073CDE1 /* ARViewBak.h */,
+				D72D57521D4D073F0073CDE1 /* ARView.h */,
+				D72D57531D4D073F0073CDE1 /* ARView.m */,
 			);
 			path = ARSample;
 			sourceTree = "<group>";
@@ -221,9 +226,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D72D57291D4B23AB0073CDE1 /* ViewController.m in Sources */,
-				D72D57501D4C8B3B0073CDE1 /* ARView.m in Sources */,
+				D72D57501D4C8B3B0073CDE1 /* ARViewBak.m in Sources */,
 				D72D57261D4B23AB0073CDE1 /* AppDelegate.m in Sources */,
 				D72D57231D4B23AB0073CDE1 /* main.m in Sources */,
+				D72D57541D4D073F0073CDE1 /* ARView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
