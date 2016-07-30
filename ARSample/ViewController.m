@@ -28,6 +28,7 @@
 
 - (void)viewDidLayoutSubviews
 {
+    // カメラ
     UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypeCamera;
     if ([UIImagePickerController isSourceTypeAvailable:sourceType]) {
         UIImagePickerController *cameraPicker = [[UIImagePickerController alloc] init];
@@ -35,6 +36,7 @@
         cameraPicker.delegate = self;
         cameraPicker.showsCameraControls = NO;
 
+        // スクリーンサイズに調整
         CGSize screenSize = [[UIScreen mainScreen] bounds].size;
         float heightRatio = 4.0f / 3.0f;
         float cameraHeight = screenSize.width * heightRatio;
@@ -43,11 +45,14 @@
         cameraPicker.cameraViewTransform = CGAffineTransformScale(cameraPicker.cameraViewTransform, scale, scale);
 
 
+        // ARビュー作成
         self.arView = [[ARView alloc] initWithFrame:[UIScreen mainScreen].bounds];
         self.arView.backgroundColor = [UIColor redColor];
         cameraPicker.cameraOverlayView = self.arView;
+        // カメラの表示
         [self presentViewController:cameraPicker animated:NO completion:nil];
 
+        // OpenGL開示
         [self.arView startAnimation];
     }
 
@@ -61,6 +66,7 @@
         [_locationManager startUpdatingHeading];
     }
 
+    // ジャイロ情報
     _motionManager = [[CMMotionManager alloc] init];
     if (_motionManager.deviceMotionAvailable) {
         // 更新の間隔を設定する
@@ -69,11 +75,11 @@
                                             withHandler: ^ (CMDeviceMotion* motion, NSError* error) {
                                                 NSLog(@"motion { 左右：%f, 上下：%f, 回転：%f }",
                                                       motion.attitude.roll, motion.attitude.pitch, motion.attitude.yaw);
-
+                                                // ARのビューにジャイロ情報を送る
                                                 self.arView.gravity = motion.gravity;
-                                                self.arView.roll = motion.attitude.roll;
-                                                self.arView.pitch = motion.attitude.pitch;
-                                                self.arView.yaw = motion.attitude.yaw;
+//                                                self.arView.roll = motion.attitude.roll;
+//                                                self.arView.pitch = motion.attitude.pitch;
+//                                                self.arView.yaw = motion.attitude.yaw;
 
 
                                             }
@@ -82,11 +88,12 @@
     }
 }
 
+// 方向の取得
 -(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
-    // 方位を表示する
     NSLog(@"trueHeading %f, magneticHeading %f",
           newHeading.trueHeading, newHeading.magneticHeading);
+    // ARのビューに現在の方向を送る
     self.arView.heading = newHeading.trueHeading;
 }
 
