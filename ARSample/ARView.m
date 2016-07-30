@@ -27,8 +27,43 @@
     return [CAEAGLLayer class];
 }
 
-- (void)_init
+//- (void)_init
+//{
+//    // レイヤーの設定をする
+//    CAEAGLLayer*    eaglLayer;
+//    eaglLayer = (CAEAGLLayer*)self.layer;
+//    eaglLayer.opaque = NO;
+//    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+//                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
+//                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+//                                    nil];
+//
+//    // OpenGLコンテキストを作成する
+//    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+//    [EAGLContext setCurrentContext:_context];
+//
+//    // フレームバッファを作成する
+//    glGenFramebuffersOES(1, &_defaultFramebuffer);
+//    glGenRenderbuffersOES(1, &_colorRenderbuffer);
+//
+//    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _defaultFramebuffer);
+//    glBindRenderbufferOES(GL_RENDERBUFFER_OES, _colorRenderbuffer);
+//    [_context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
+//    glFramebufferRenderbufferOES(
+//                                 GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, _colorRenderbuffer);
+//
+//    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &_backingWidth);
+//    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &_backingHeight);
+//}
+//
+- (id)initWithFrame:(CGRect)frame
 {
+    self = [super initWithFrame:frame];
+    if (!self) {
+        return nil;
+    }
+
+    // 初期化
     // レイヤーの設定をする
     CAEAGLLayer*    eaglLayer;
     eaglLayer = (CAEAGLLayer*)self.layer;
@@ -54,33 +89,22 @@
 
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &_backingWidth);
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &_backingHeight);
-}
-
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (!self) {
-        return nil;
-    }
-
-    // 初期化
-    [self _init];
 
     return self;
 }
 
-- (id)initWithCoder:(NSCoder*)decoder
-{
-    self = [super initWithCoder:decoder];
-    if (!self) {
-        return nil;
-    }
-
-    // 初期化
-    [self _init];
-
-    return self;
-}
+//- (id)initWithCoder:(NSCoder*)decoder
+//{
+//    self = [super initWithCoder:decoder];
+//    if (!self) {
+//        return nil;
+//    }
+//
+//    // 初期化
+//    [self _init];
+//
+//    return self;
+//}
 
 #pragma mark Drawing
 
