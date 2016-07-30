@@ -70,29 +70,52 @@
     _motionManager = [[CMMotionManager alloc] init];
     if (_motionManager.deviceMotionAvailable) {
         // 更新の間隔を設定する
-        _motionManager.deviceMotionUpdateInterval = 0.5f;
+        _motionManager.deviceMotionUpdateInterval = 0.1f;
         [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue currentQueue]
                                             withHandler: ^ (CMDeviceMotion* motion, NSError* error) {
-                                                NSLog(@"motion { 左右：%f, 上下：%f, 回転：%f }",
-                                                      motion.attitude.roll, motion.attitude.pitch, motion.attitude.yaw);
+                                                //NSLog(@" %.1f %.1f",motion.gravity.x , motion.gravity.z);
                                                 // ARのビューにジャイロ情報を送る
                                                 self.arView.gravity = motion.gravity;
-//                                                self.arView.roll = motion.attitude.roll;
-//                                                self.arView.pitch = motion.attitude.pitch;
-//                                                self.arView.yaw = motion.attitude.yaw;
-
-
                                             }
+
+//         motion.attitude.pitch * 180 / M_PI
+         
          ];
 
     }
+    // dデバイスの回転の検出
+    // 通知を解除する
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(didChangedOrientation:)
+               name:UIDeviceOrientationDidChangeNotification object:nil];
 }
+
+
+#pragma mark - Notification
+
+- (void)didChangedOrientation:(NSNotification *)notification
+{
+    UIDeviceOrientation orientation = [[notification object] orientation];
+    switch (orientation) {
+
+        case UIDeviceOrientationPortrait:
+        case UIDeviceOrientationPortraitUpsideDown:
+            self.arView.isPortrait = true;
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+        case UIDeviceOrientationLandscapeRight:
+            self.arView.isPortrait = false;
+            break;
+    }
+}
+
 
 // 方向の取得
 -(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
-    NSLog(@"trueHeading %f, magneticHeading %f",
-          newHeading.trueHeading, newHeading.magneticHeading);
+//    NSLog(@"trueHeading %f, magneticHeading %f",
+//          newHeading.trueHeading, newHeading.magneticHeading);
     // ARのビューに現在の方向を送る
     self.arView.heading = newHeading.trueHeading;
 }

@@ -66,48 +66,54 @@ CADisplayLink* displayLink;
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
+
+    self.isPortrait = YES;
     return self;
 }
 
-
 - (void)drawView:(id)sender
 {
-    // 現在のコンテキストを作成する
-    if([EAGLContext currentContext] != context){
+    // コンテキストを作成
+    if ([EAGLContext currentContext] != context) {
         [EAGLContext setCurrentContext:context];
     }
-
-    // OpenGLの設定をする
+    // OpenGLの設定
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
     glViewport(0, 0, backingWidth, backingHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // カラーバッファをクリアする
+    // カラーバッファのクリア
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // 射影変換の設定をする
+    // 射影変換の設定
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrthof(-1.0f, 1.0f, -1.5f, 1.5f, 0, 10.0f);
 
-    // モデルビューの設定をする
+    // モデルビューの設定
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // OpenGLの状態を有効化する
+    // OpenGLの状態を有効化
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    // 加速度による回転を行う
-    glRotatef(_gravity.z * -90.0f, 1.0f, 0, 0);
+    // 加速度による回転
+    glRotatef(_gravity.z * -90.0, 1, 0, 0);
+    glRotatef(_gravity.x * 90, 0, 0, 1);
+//  glRotatef(_gravity.y * -90.0f, 0, 1, 0); // これはコンパスで制御する
+    // 電子コンパスによる回転
+    if ( _isPortrait) {
+        glRotatef(_heading , 0, 1, 0);
+    }
+    else {
+        glRotatef(_heading - 270, 0, 1, 0); // 横向きになると、コンパスの値が変わる
+    }
 
-    // 電子コンパスによる回転を行う
-    glRotatef(_heading, 0, 1.0f, 0);
-
-    // ポリゴンを作成する
+    // ポリゴン作成
     int i;
     for (i = 0; i < 16; i++) {
         // 現在の行列を保存する
@@ -172,6 +178,5 @@ CADisplayLink* displayLink;
     // ディスプレイリンクを無効化する
     [displayLink invalidate], displayLink = nil;
 }
-
 
 @end
