@@ -17,6 +17,7 @@
 		D72D574E1D4C375C0073CDE1 /* image.png in Resources */ = {isa = PBXBuildFile; fileRef = D72D574D1D4C375C0073CDE1 /* image.png */; };
 		D72D57501D4C8B3B0073CDE1 /* ARViewBak.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D574F1D4C8B3B0073CDE1 /* ARViewBak.m */; };
 		D72D57541D4D073F0073CDE1 /* ARView.m in Sources */ = {isa = PBXBuildFile; fileRef = D72D57531D4D073F0073CDE1 /* ARView.m */; };
+		D72D57581D4E8B040073CDE1 /* mesoko.png in Resources */ = {isa = PBXBuildFile; fileRef = D72D57571D4E8B040073CDE1 /* mesoko.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,8 @@
 		D72D57511D4C8B550073CDE1 /* ARViewBak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARViewBak.h; sourceTree = "<group>"; };
 		D72D57521D4D073F0073CDE1 /* ARView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARView.h; sourceTree = "<group>"; };
 		D72D57531D4D073F0073CDE1 /* ARView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARView.m; sourceTree = "<group>"; };
+		D72D57571D4E8B040073CDE1 /* mesoko.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mesoko.png; sourceTree = "<group>"; };
+		D72D57591D4F28350073CDE1 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +74,7 @@
 		D72D57151D4B23AB0073CDE1 = {
 			isa = PBXGroup;
 			children = (
+				D72D57591D4F28350073CDE1 /* CoreLocation.framework */,
 				D72D57201D4B23AB0073CDE1 /* ARSample */,
 				D72D573A1D4B23AC0073CDE1 /* ARSampleTests */,
 				D72D571F1D4B23AB0073CDE1 /* Products */,
@@ -89,6 +93,7 @@
 		D72D57201D4B23AB0073CDE1 /* ARSample */ = {
 			isa = PBXGroup;
 			children = (
+				D72D57571D4E8B040073CDE1 /* mesoko.png */,
 				D72D574D1D4C375C0073CDE1 /* image.png */,
 				D72D57241D4B23AB0073CDE1 /* AppDelegate.h */,
 				D72D57251D4B23AB0073CDE1 /* AppDelegate.m */,
@@ -204,6 +209,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D72D57581D4E8B040073CDE1 /* mesoko.png in Resources */,
 				D72D57311D4B23AB0073CDE1 /* LaunchScreen.storyboard in Resources */,
 				D72D572E1D4B23AB0073CDE1 /* Assets.xcassets in Resources */,
 				D72D572C1D4B23AB0073CDE1 /* Main.storyboard in Resources */,

@@ -20,6 +20,7 @@ GLuint colorRenderbuffer;
 GLint  backingWidth;
 GLint  backingHeight;
 CADisplayLink* displayLink;
+float ratio;
 
 + (Class)layerClass
 {
@@ -40,6 +41,7 @@ CADisplayLink* displayLink;
     CAEAGLLayer *layer = (CAEAGLLayer*)self.layer;
     // カメラの表示が見えるようにするため透明にする
     layer.opaque = NO;
+
     // 描画の設定
     layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [NSNumber numberWithBool:NO],kEAGLDrawablePropertyRetainedBacking, //描画後にレンダバッファを破棄
@@ -66,7 +68,52 @@ CADisplayLink* displayLink;
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
     glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
+    // 画面の縦横比率
+    ratio = [UIScreen mainScreen].bounds.size.height / [UIScreen mainScreen].bounds.size.width;
+
+    [self setTexture:@"mesoko.png"];
+
+
     return self;
+}
+
+
+// パラメータにテクスチャ画像のファイル名を指定する。
+-(void)setTexture:(NSString *)texturename {
+    // テクスチャ画像ファイルをロード
+    UIImage *teximage = [UIImage imageNamed:texturename];
+
+    CGImageRef textureImage = teximage.CGImage;
+    // サイズを取得
+    NSInteger texWidth = CGImageGetWidth(textureImage);
+    NSInteger texHeight = CGImageGetHeight(textureImage);
+    // テクスチャデータのメモリを確保（使わなくなったら解放を忘れずに！）
+    GLubyte *textureData = (GLubyte *)malloc(texWidth * texHeight * 4);
+    // テクスチャ画像のコンテキストを作成
+    CGContextRef textureContext = CGBitmapContextCreate(
+                                                        textureData,
+                                                        texWidth,
+                                                        texHeight,
+                                                        8, texWidth * 4,
+                                                        CGImageGetColorSpace(textureImage),
+                                                        kCGImageAlphaPremultipliedLast);
+    CGContextDrawImage(textureContext, CGRectMake(0.0, 0.0, (float)texWidth, (float)texHeight), textureImage);
+    CGContextRelease(textureContext);
+
+    // ここまでがロード処理
+    //これからテクスチャの初期化処理
+
+    GLuint texid;
+
+    glGenTextures(1, &texid);
+
+    glBindTexture(GL_TEXTURE_2D, texid);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA,GL_UNSIGNED_BYTE, textureData);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 }
 
 - (void)drawView:(id)sender
@@ -88,7 +135,7 @@ CADisplayLink* displayLink;
     // 射影変換の設定
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrthof(-1.0f, 1.0f, -1.5f, 1.5f, 0, 10.0f);
+    glOrthof(-1.0f, 1.0f, -ratio, ratio, 0, 10.0f);
 
     // モデルビューの設定
     glMatrixMode(GL_MODELVIEW);
@@ -119,45 +166,14 @@ CADisplayLink* displayLink;
     }
     glRotatef(heading , 0, 1, 0);
 
-    // ポリゴン作成
-    int i;
-    for (i = 0; i < 16; i++) {
-        // 現在の行列を保存する
-        glPushMatrix();
+    // マーカーの描画
+//    [self marker:0 :3]; // 0度の方向で、距離3
+//    [self marker:30 :2]; // 30度の方向で、距離2
+    //[self mesoko:-80 :2];
+    [self rectangle:0 :3];
+    //[self mesoko:0 :3];
+//    [self flore:0 :3];// 真下
 
-        // オブジェクトの位置を決定する
-        glRotatef(360.0f / 16 * i, 0, 1.0f, 0);
-        glTranslatef(0, 0, -2.0f);
-
-        // ポリゴンの頂点を設定する
-        GLfloat vleft, vright, vtop, vbottom;
-        vleft = -0.2f;
-        vright = 0.2f;
-        vtop = -0.2f;
-        vbottom = 0.2f;
-        GLfloat squareVertices[] = {
-            vleft, vbottom,
-            vright, vbottom,
-            vleft, vtop,
-            vright, vtop,
-        };
-        glVertexPointer(2, GL_FLOAT, 0, squareVertices);
-
-        // ポリゴンの色を設定する
-        const GLubyte squareColors[] = {
-            16 * i, 255 - (16 * i), 255, 255,
-            16 * i, 255 - (16 * i), 255, 255,
-            16 * i, 255 - (16 * i), 255, 255,
-            16 * i, 255 - (16 * i), 255, 255,
-        };
-        glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
-
-        // ポリゴンを描画する
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        // 以前の行列に戻す
-        glPopMatrix();
-    }
 
     // バッファを描画する
     glBindRenderbufferOES(GL_RENDERBUFFER_OES, framebuffer);
@@ -168,6 +184,188 @@ CADisplayLink* displayLink;
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
+
+
+- (void) mesoko:(float)angle :(float)distance
+{
+    // 現在の行列を保存する
+    glPushMatrix();
+
+
+//    [self setTexture:@"mesoko.png"];
+
+    // オブジェクトの位置を決定する
+    glRotatef(-angle, 0, 1, 0);
+    glTranslatef(0, 0, -distance);
+
+    // 頂点座標を登録
+    GLfloat left = -0.5f;
+    GLfloat right = 0.5f;
+    GLfloat top = -3.0f;
+    GLfloat bottom = -1.0f;
+    GLfloat squareVertices[] = {
+        left, bottom,
+        right, bottom,
+        left, top,
+        right, top,
+    };
+    glVertexPointer(2, GL_FLOAT, 0, squareVertices);
+
+    // 頂点色を設定(半透明の白色)
+    const GLubyte squareColors[] = {
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+    };
+
+    // テクスチャ座標配列を定義（追加）
+    const GLfloat squareCoords[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+    };
+
+    // 色配列の定義を削除
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    // テクスチャ座標配列を定義（追加）
+    glTexCoordPointer(2, GL_FLOAT, 0, squareCoords);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    // テクスチャを有効化（追加）
+    glEnable(GL_TEXTURE_2D);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+    // 以前の行列に戻す
+    glPopMatrix();
+}
+
+- (void) rectangle:(float)angle :(float)distance
+{
+    // 白い四角を真北に表示
+    // 現在の行列を保存する
+    glPushMatrix();
+
+    // オブジェクトの位置を決定する
+    glRotatef(-angle, 0, 1, 0);
+    glTranslatef(0, 0, -distance);
+
+    // 頂点座標を登録
+    GLfloat left = -0.5f;
+    GLfloat right = 0.5f;
+    GLfloat top = -0.5f;
+    GLfloat bottom = 0.5f;
+    GLfloat squareVertices[] = {
+        left, bottom,
+        right, bottom,
+        left, top,
+        right, top,
+    };
+    glVertexPointer(2, GL_FLOAT, 0, squareVertices);
+
+    // 頂点色を設定(半透明の白色)
+    const GLubyte squareColors[] = {
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
+    glEnableClientState(GL_COLOR_ARRAY);
+    // 描画する
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // 以前の行列に戻す
+    glPopMatrix();
+}
+
+
+
+- (void) marker:(float)angle :(float)distance
+{
+    // 白い四角を真北に表示
+    // 現在の行列を保存する
+    glPushMatrix();
+
+    // オブジェクトの位置を決定する
+    glRotatef(-angle, 0, 1, 0);
+    glTranslatef(0, 0, -distance);
+
+    // 頂点座標を登録
+    GLfloat left = -0.5f;
+    GLfloat right = 0.5f;
+    GLfloat top = -0.5f;
+    GLfloat bottom = 0.5f;
+    GLfloat squareVertices[] = {
+        left, bottom,
+        right, bottom,
+        left, top,
+        right, top,
+    };
+    glVertexPointer(2, GL_FLOAT, 0, squareVertices);
+
+    // 頂点色を設定(半透明の白色)
+    const GLubyte squareColors[] = {
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+        255, 255, 255, 155,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
+    glEnableClientState(GL_COLOR_ARRAY);
+    // 描画する
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // 以前の行列に戻す
+    glPopMatrix();
+}
+
+
+
+- (void) flore:(float)angle :(float)distance
+{
+
+    // 白い四角を真下に表示
+    // 現在の行列を保存する
+    glPushMatrix();
+
+    // オブジェクトの位置を決定する
+    glRotatef(-90, 1, 0, 0); //真下に向ける
+    glTranslatef(0, 0, -distance);
+
+    // 頂点座標を登録
+    GLfloat left = -3.5f;
+    GLfloat right = 3.5f;
+    GLfloat top = -3.5f;
+    GLfloat bottom = 3.5f;
+    GLfloat squareVertices[] = {
+        left, bottom,
+        right, bottom,
+        left, top,
+        right, top,
+    };
+    glVertexPointer(2, GL_FLOAT, 0, squareVertices);
+
+    // 頂点色を設定(半透明の白色)
+    const GLubyte squareColors[] = {
+        255, 255, 255, 100,
+        255, 255, 255, 100,
+        255, 255, 255, 100,
+        255, 255, 255, 100,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
+    // 描画する
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // 以前の行列に戻す
+    glPopMatrix();
+}
+
+
 
 #pragma mark Public Method
 
